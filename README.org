@@ -1,8 +1,10 @@
 #+TITLE: iorg
 
 Self contained org-mode files with images. Put encoded image data like the
-following in a buffer and enable ~iorg-mode~.
+following in a buffer within ~#BEGIN_IMAGE ... #END_IMAGE~ block and enable
+~iorg-mode~.
 
+#+BEGIN_EXAMPLE
 #+BEGIN_IMAGE
 iVBORw0KGgoAAAANSUhEUgAAAMgAAADZCAYAAABl0n+gAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
 AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAA
@@ -322,7 +324,8 @@ OJ8PRf4AAAAldEVYdGRhdGU6Y3JlYXRlADIwMTctMDgtMTBUMTU6MTg6MzkrMDA6MDDYyTgoAAAA
 JXRFWHRkYXRlOm1vZGlmeQAyMDE3LTA4LTEwVDE1OjE4OjM5KzAwOjAwqZSAlAAAAABJRU5ErkJg
 gg==
 #+END_IMAGE
+#+END_EXAMPLE
 
 By the way, the image above is the following:
 
-[[file:./org/png]]
+[[file:./org.png]]
