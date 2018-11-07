@@ -1,7 +1,7 @@
 #+TITLE: iorg
 
 Self contained org-mode files with images. Put encoded image data like the
-following in a buffer within ~#BEGIN_IMAGE ... #END_IMAGE~ block and enable
+following in a buffer within ~#+BEGIN_IMAGE ... #+END_IMAGE~ block and enable
 ~iorg-mode~.
 
 #+BEGIN_EXAMPLE
