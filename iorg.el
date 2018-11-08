@@ -32,10 +32,11 @@
 (require 'f)
 (require 'org)
 
-(org-add-link-type "iorg" #'iorg-toggle-image-at-point #'iorg-export)
+;; NOTE: The link doesn't do anything actionable right now
+(org-add-link-type "iorg" #'iorg-link-action #'iorg-export)
 
 (defvar-local iorg-overlays nil
-  "List of invisibility overlays applied.")
+  "List of overlays applied in buffer.")
 
 (defun iorg-encode (image-bytes)
   (base64-encode-string image-bytes))
@@ -43,16 +44,25 @@
 (defun iorg-decode (data-string)
   (base64-decode-string data-string))
 
+(defun iorg-link-action (_path)
+  ;; TODO: Maybe toggle?
+  (message "No action available for iorg links."))
+
+(defun iorg-export (_path _desc _backend)
+  ;; TODO: At least need the html export support
+  (message "No export function available for iorg links."))
+
 ;;;###autoload
 (defun iorg-insert-image-at-point (image-file-path image-id)
   "Insert an iorg image block using the given information. `image-id' defines
 the name of the block if specified."
-  (interactive "f\nsImage ID: ")
+  (interactive "f\nsImage ID (leave empty for no id): ")
   (let ((image-bytes (f-read-bytes image-file-path))
         (image-id (if (string-equal "" image-id) nil image-id)))
     (iorg-insert-block image-bytes image-id)))
 
 (defun iorg-insert-block (image-bytes &optional image-id)
+  "Insert image-bytes at point and optionally apply the image-id"
   (let ((encoded (iorg-encode image-bytes)))
     (insert (format "#+BEGIN_IMAGE\n%s\n#+END_IMAGE" encoded)))
   (when image-id
@@ -72,7 +82,24 @@ the name of the block if specified."
         (setq ranges (cons (cons beg end) ranges)))
       ranges)))
 
-(defun iorg-range-name (range)
+(defun iorg-get-iorg-links ()
+  "Return a list of iorg link items from the buffer."
+  (org-element-map (org-element-parse-buffer) 'link
+    (lambda (link)
+      (when (string-equal (org-element-property :type link) "iorg")
+        link))))
+
+(defun iorg-link-to-range (link)
+  "Get the range from iorg link."
+  (let ((id (org-element-property :path link)))
+    (iorg-id-to-range id)))
+
+(defun iorg-id-to-range (id)
+  "Return image block range that matches the given id."
+  (let ((ranges (iorg-get-image-ranges)))
+    (find id ranges :key (lambda (range) (iorg-range-to-id range)) :test #'string-equal)))
+
+(defun iorg-range-to-id (range)
   "Return name of the block signified by the range."
   (save-excursion
     (goto-char (car range))
@@ -81,16 +108,37 @@ the name of the block if specified."
       (if (string-prefix-p "#+name:" (downcase line-text))
           (string-trim (substring-no-properties line-text 7))))))
 
-(defun iorg-show-image (range)
-  (let* ((image-data (buffer-substring-no-properties (car range) (cdr range)))
-         (overlay (make-overlay (car range) (cdr range)))
-         (img (create-image (iorg-decode image-data) nil t)))
+(defun iorg-show-links ()
+  "Display all the link type images"
+  (dolist (link (iorg-get-iorg-links))
+    (let ((img (iorg-get-image (iorg-link-to-range link)))
+          (overlay (make-overlay (org-element-property :begin link) (org-element-property :end link))))
+      (overlay-put overlay 'display img)
+      (push overlay iorg-overlays))))
+
+(defun iorg-get-image (range)
+  "Return image object. TODO: Cache this."
+  (let ((image-data (buffer-substring-no-properties (car range) (cdr range))))
+    (create-image (iorg-decode image-data) nil t)))
+
+(defun iorg-show-range (range)
+  (let ((overlay (make-overlay (car range) (cdr range)))
+        (img (iorg-get-image range)))
     (overlay-put overlay 'display img)
+    (push overlay iorg-overlays)))
+
+(defun iorg-hide-range (range)
+  "Hide data of a range to save space."
+  (let ((overlay (make-overlay (car range) (cdr range))))
+    (overlay-put overlay 'invisible t)
     (push overlay iorg-overlays)))
 
 (defun iorg-enable ()
   (dolist (range (iorg-get-image-ranges))
-    (iorg-show-image range)))
+    (if (iorg-range-to-id range)
+        (iorg-hide-range range)
+      (iorg-show-range range)))
+  (iorg-show-links))
 
 (defun iorg-disable ()
   (dolist (overlay iorg-overlays)
