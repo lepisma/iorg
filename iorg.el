@@ -72,6 +72,15 @@ the name of the block if specified."
         (setq ranges (cons (cons beg end) ranges)))
       ranges)))
 
+(defun iorg-range-name (range)
+  "Return name of the block signified by the range."
+  (save-excursion
+    (goto-char (car range))
+    (previous-line 2)
+    (let ((line-text (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
+      (if (string-prefix-p "#+name:" (downcase line-text))
+          (string-trim (substring-no-properties line-text 7))))))
+
 (defun iorg-show-image (range)
   (let* ((image-data (buffer-substring-no-properties (car range) (cdr range)))
          (overlay (make-overlay (car range) (cdr range)))
