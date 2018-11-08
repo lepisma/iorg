@@ -67,6 +67,7 @@
     (delete-overlay overlay))
   (setq iorg-overlays nil))
 
+;;;###autoload
 (define-minor-mode iorg-mode
   "Mode for displaying in-buffer base64 images."
   :init-value nil
