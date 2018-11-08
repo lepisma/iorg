@@ -4,6 +4,8 @@ Self contained org-mode files with images. Put encoded image data in a buffer
 within ~#+BEGIN_IMAGE~ ... ~#+END_IMAGE~ block and enable ~iorg-mode~ to display in
 place.
 
+[[file:./screen.gif]]
+
 An example of such image block is shown below (check the raw file to see full
 markup).
 
