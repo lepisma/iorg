@@ -29,14 +29,35 @@
 
 ;;; Code:
 
+(require 'f)
+(require 'org)
+
+(org-add-link-type "iorg" #'iorg-toggle-image-at-point #'iorg-export)
+
 (defvar-local iorg-overlays nil
   "List of invisibility overlays applied.")
 
-(defun iorg-encode (data)
-  (base64-encode-string data))
+(defun iorg-encode (image-bytes)
+  (base64-encode-string image-bytes))
 
 (defun iorg-decode (data-string)
   (base64-decode-string data-string))
+
+;;;###autoload
+(defun iorg-insert-image-at-point (image-file-path image-id)
+  "Insert an iorg image block using the given information. `image-id' defines
+the name of the block if specified."
+  (interactive "f\nsImage ID: ")
+  (let ((image-bytes (f-read-bytes image-file-path))
+        (image-id (if (string-equal "" image-id) nil image-id)))
+    (iorg-insert-block image-bytes image-id)))
+
+(defun iorg-insert-block (image-bytes &optional image-id)
+  (let ((encoded (iorg-encode image-bytes)))
+    (insert (format "#+BEGIN_IMAGE\n%s\n#+END_IMAGE" encoded)))
+  (when image-id
+    (re-search-backward "^#\\+BEGIN_IMAGE" nil t)
+    (insert (format "#+NAME: %s\n" image-id))))
 
 (defun iorg-get-image-ranges ()
   "Return a list of (beg . end) ranges representing image data."
