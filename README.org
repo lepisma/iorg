@@ -1,10 +1,14 @@
 #+TITLE: iorg
 
-Self contained org-mode files with images. Put encoded image data like the
-following in a buffer within ~#+BEGIN_IMAGE ... #+END_IMAGE~ block and enable
-~iorg-mode~.
+Self contained org-mode files with images. Put encoded image data in a buffer
+within ~#+BEGIN_IMAGE~ ... ~#+END_IMAGE~ block and enable ~iorg-mode~ to display in
+place.
+
+An example of such image block is shown below (check the raw file to see full
+markup).
 
 #+BEGIN_EXAMPLE
+#+NAME: an-image
 #+BEGIN_IMAGE
 iVBORw0KGgoAAAANSUhEUgAAAMgAAADZCAYAAABl0n+gAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
 AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAA
@@ -326,6 +330,28 @@ gg==
 #+END_IMAGE
 #+END_EXAMPLE
 
-By the way, the image above is the following:
+** Naming blocks and linking
+
+Optionally, you can name the block using ~#+NAME: that-screenshot~ and then use
+iorg links like ~[[iorg:that-screenshot]]~ to put images in the file anywhere. This is
+useful if you want to keep /blob-ish/ data at one place (at the bottom let's say).
+
+Once the minor mode is enabled, named blocks are hidden and images are shown
+replacing the image chunks. You can setup a hook like the following to avoid the
+ugly blobs:
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-mode-hook 'iorg-mode)
+#+END_SRC
+
+The data up in the README represents the following image (displayed from local
+file):
 
 [[file:./org.png]]
+
+Here is the iorg link version of the same image (will be visible in Emacs):
+
+[[iorg:an-image]]
+
+** Loading local image
+Check ~iorg-insert-image-at-point~.
